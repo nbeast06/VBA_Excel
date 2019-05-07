@@ -1,0 +1,63 @@
+Sub Button1_Click()
+    Dim MultiFile As Boolean
+    Dim last_row As Long
+    MultiFile = True
+    Files = Application.GetOpenFilename(Title:="Please choose MDB files", FileFilter:="Report Files(*.mdb*),*.mdb*", MultiSelect:=MultiFile)
+    
+    If IsArray(Files) = False Then
+    
+        MsgBox "No file has been specified!", vbExclamation, "ERROR!"
+        ActiveSheet.Select
+        Exit Sub
+        
+    Else
+    
+        For i = LBound(Files) To UBound(Files)
+        Dim cnn As ADODB.Connection
+        Dim rs As ADODB.Recordset
+        Dim strFilePath As String
+        Dim n As Integer
+        'loades multiple files for processing
+        strFilePath = Files(i)
+        
+        Set cnn = New ADODB.Connection
+        Set rs = New ADODB.Recordset
+        cnn.Open "Provider=Microsoft.ACE.OLEDB.12.0;" & _
+        "Data Source=" & strFilePath & ";"
+        
+        sQRY = "TRANSFORM MAX(t.Result) " & _
+                "Select t.StatID as GBI, TestConf.GrpKey as TestDate, t.ZName as TestZone, t.TrkNo as TestTrack, t.SName as Setup, t.HdNo, t.PartID as HeadSN, t.Conf, t.ItrID " & _
+                "From (SELECT * FROM TestConf INNER JOIN TestResult ON TestConf.ConfID = TestResult.ConfID AND Testconf.GrpKey = TestResult.GrpKey WHERE TrkNo <> -1 AND Conf < 10000) As t " & _
+                "Group By t.StatID, TestConf.GrpKey, t.ZName, t.TrkNo, t.SName, t.HdNo, t.PartID, t.Conf, t.ItrID " & _
+                "PIVOT t.RsltName"
+                
+        rs.CursorLocation = adUseClient
+        rs.Open sQRY, cnn, adOpenStatic, adLockReadOnly
+        Application.ScreenUpdating = False
+        
+        If i = 1 Then
+            For n = 1 To rs.Fields.Count
+                ActiveSheet.Cells(4, n).Value = rs.Fields(n - 1).Name
+            Next n
+        End If
+            
+        last_row = ActiveSheet.Range("A300000").End(xlUp).Row
+        Debug.Print last_row
+        If last_row < 4 Then last_row = 4
+        
+        ActiveSheet.Range("A" & last_row + 1).CopyFromRecordset rs
+
+        rs.Close
+        Set rs = Nothing
+        cnn.Close
+        Set cnn = Nothing
+        
+        
+        Next i
+    End If
+End Sub
+Sub Clear()
+    Cells.Select
+    Selection.ClearContents
+    Cells(1, 1).Select
+End Sub

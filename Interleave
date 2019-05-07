@@ -1,0 +1,250 @@
+Sub getdata()
+    Dim r1sheet As Worksheet, r2sheet As Worksheet, datasheet As Worksheet
+    Dim i As Integer, j As Integer, k As Long
+    Dim r1col_end As Integer, r2col_end As Integer
+    Dim r1col_start As Integer, r2col_start As Integer
+    Dim r1row_end As Integer, r2row_end As Integer
+    Dim r1row_start As Integer, r2row_start As Integer
+    Dim listbin1() As String, listbin2() As String, bin1_loc() As Integer, tray_loc As Integer, traynum_loc As Integer
+    Dim r1_bin As Integer, r2_bin As Integer
+    Dim r1_refpoint As String, r2_refpoint As String
+    Dim temp_ref As String, bin1_rowend() As Integer
+    Dim rcount As Integer, r1_start As Integer, r2_start As Integer
+    
+    r1_bin = 12
+    r2_bin = 4
+    r1_start = 22
+    r2_start = 13
+    
+    r1_refpoint = NumToAlpha(20) & r1_bin & ":" & NumToAlpha(20) & r1_bin
+    r2_refpoint = NumToAlpha(300) & r2_bin & ":" & NumToAlpha(300) & r2_bin
+    Set r1sheet = ThisWorkbook.Worksheets("HGA Serial")
+    Set r2sheet = ThisWorkbook.Worksheets("Production Serial")
+    Set datasheet = ThisWorkbook.Worksheets("Data")
+    r1col_end = r1sheet.Range(r1_refpoint).End(xlToLeft).Column
+    r2col_end = r2sheet.Range(r2_refpoint).End(xlToLeft).Column
+    rcount = 0
+    'search for  bin numbers
+    'get bin locations for exporting to interleave
+    For i = 1 To r1col_end
+        'Debug.Print r1sheet.Cells(r1_bin, i)
+        If r1sheet.Cells(r1_bin, i) <> "" And r1sheet.Cells(r1_bin, i) <> "BIN:" Then
+            
+            ReDim Preserve listbin1(rcount)
+            ReDim Preserve bin1_loc(rcount)
+            ReDim Preserve bin1_rowend(rcount)
+            
+            listbin1(rcount) = r1sheet.Cells(r1_bin, i)
+            bin1_loc(rcount) = i
+            temp_ref = NumToAlpha(i) & 100000 & ":" & NumToAlpha(i) & 100000
+            bin1_rowend(rcount) = r1sheet.Range(temp_ref).End(xlUp).Row
+            
+            'Debug.Print listbin1(rcount) & " " & bin1_loc(rcount) & " " & bin1_rowend(rcount)
+            
+            rcount = rcount + 1
+            
+        End If
+        
+    Next i
+    
+    Dim bin2_rowend() As Integer, bin2_loc() As Integer
+    Dim temp_val As String, rcount3 As Long, tray(1000, 1000) As String
+    Dim max_
+    rcount2 = 0
+    'get the tray numbers from row 2
+    For j = 1 To r2col_end
+        If r2sheet.Cells(r2_bin, j) <> "" And r2sheet.Cells(r2_bin, j) <> "BIN:" And r2sheet.Cells(r2_bin, j) <> 0 Then
+            ReDim Preserve listbin2(rcount2)
+            ReDim Preserve bin2_loc(rcount2)
+            ReDim Preserve bin2_rowend(rcount2)
+            
+            listbin2(rcount2) = r2sheet.Cells(r2_bin, j)
+            bin2_loc(rcount2) = j
+            temp_ref = NumToAlpha(j) & 100000 & ":" & NumToAlpha(j) & 100000
+            bin2_rowend(rcount2) = r2sheet.Range(temp_ref).End(xlUp).Row
+            
+            For k = 100000 To 1 Step -1
+                If r2sheet.Cells(k, j) <> "" And r2sheet.Cells(k, j) <> 0 Then
+                    bin2_rowend(rcount2) = k
+                    Exit For
+                End If
+            Next k
+            'Debug.Print listbin2(rcount2) & " " & bin2_loc(rcount2) & " " & bin2_rowend(rcount2)
+            rcount3 = 0
+            For k = r2_start To bin2_rowend(rcount2)
+                If k = r2_bin Then
+                temp_val = r2sheet.Cells(k, j - 2)
+                'Debug.Print temp_val
+                End If
+                If r2sheet.Cells(k, j - 2) <> temp_val Then
+                    temp_val = r2sheet.Cells(k, j - 2)
+                    'Debug.Print temp_val
+                    'Debug.Print rcount2 & " " & rcount3
+                    'ReDim Preserve tray(rcount2, rcount3)
+                    tray(rcount2, rcount3) = temp_val
+                    Debug.Print rcount2 & " " & rcount3; " " & tray(rcount2, rcount3)
+                    rcount3 = rcount3 + 1
+                End If
+            Next k
+            rcount2 = rcount2 + 1
+        End If
+    Next j
+    
+    Dim SNset_range As String, TRset_range As String, TRPset_range As String
+    Dim tray_col As Integer, traypos_col As Integer
+    Dim data_refpoint As Integer, data_hsn As Integer
+    Dim data_rowstart As Integer, data_rowend As Integer
+    Dim data_hsnrow As String, data_tray As String, jcount As Integer
+    tray_col = 5
+    traypos_col = 6
+    data_hsn = 9
+    data_rowstart = 6
+    
+    For i = 0 To UBound(listbin1)
+        'Debug.Print listbin1(i) & " " & bin1_loc(i) & " " & bin1_rowend(i)
+        SNset_range = NumToAlpha(bin1_loc(i)) & r1_start & ":" & NumToAlpha(bin1_loc(i)) & bin1_rowend(i)
+        TRset_range = NumToAlpha(tray_col) & r1_start & ":" & NumToAlpha(traypos_col) & bin1_rowend(i)
+        data_refpoint = datasheet.Range(NumToAlpha(data_hsn) & 100000 & ":" & NumToAlpha(data_hsn) & 100000).End(xlUp).Row
+        data_refpoint = data_refpoint + 1
+        'Debug.Print data_refpoint
+        'Debug.Print (TRset_range)
+        
+        data_rowend = data_refpoint + (bin1_rowend(i) - r1_start)
+        
+        r1sheet.Range(SNset_range).Copy
+        data_hsnrow = NumToAlpha(data_hsn) & data_refpoint & ":" & NumToAlpha(data_hsn) & data_rowend
+        datasheet.Range(data_hsnrow).PasteSpecial (xlPasteValues)
+        data_tray = NumToAlpha(6) & data_refpoint & ":" & NumToAlpha(7) & data_rowend
+        'Debug.Print TRset_range
+        r1sheet.Range(TRset_range).Copy
+        datasheet.Range(data_tray).PasteSpecial (xlPasteValues)
+        
+        jcount = 0
+        For j = data_refpoint To data_rowend
+            datasheet.Cells(j, 4) = i + 1
+            datasheet.Cells(j, 5) = jcount + 1
+            datasheet.Cells(j, 8) = listbin1(i)
+            'Debug.Print (tray(CInt(datasheet.Cells(j, 4)) + 1, CInt(datasheet.Cells(j, 5))))
+            datasheet.Cells(j, 6) = tray(CInt(datasheet.Cells(j, 4)) - 1, CInt(datasheet.Cells(j, 6)) - 1)
+            jcount = jcount + 1
+        Next j
+    Next i
+    
+    Range("A1").Select
+End Sub
+Sub interleave()
+
+Dim datasheet As Worksheet
+
+Set datasheet = ThisWorkbook.ActiveSheet
+
+
+datasheet.Sort.SortFields.Clear
+datasheet.Sort.SortFields.Add Key:=Range( _
+    NumToAlpha(5) & 5 & ":" & NumToAlpha(5) & "10000"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+    xlSortNormal
+datasheet.Sort.SortFields.Add Key:=Range( _
+    NumToAlpha(4) & 5 & ":" & NumToAlpha(4) & "10000"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+    xlSortNormal
+With datasheet.Sort
+    .SetRange Range(NumToAlpha(2) & 5 & ":" & NumToAlpha(10) & "10000")
+    .Header = xlYes
+    .MatchCase = False
+    .Orientation = xlTopToBottom
+    .SortMethod = xlPinYin
+    .Apply
+End With
+Range("A1").Select
+End Sub
+Public Function NumToAlpha(ByVal n As Long) As String   '
+    Dim strRet As String
+    Const cStringTable As String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    If n < 1& Then Exit Function
+    strRet = Mid$(cStringTable, (n - 1&) Mod 26 + 1&, 1&)
+    Do While n > 26&
+        n = (n - 1&) \ 26
+        strRet = Mid$(cStringTable, (n - 1&) Mod 26& + 1&, 1&) & strRet
+    Loop
+    NumToAlpha = strRet
+End Function
+Sub doClear()
+    Dim Row_DataEnd As Long, Col_DataEnd As Long
+    
+'    Row_DataEnd = ThisWorkbook.Sheets(ActiveSheet.Name).Range("B10000").End(xlUp).Row
+'    Col_DataEnd = ThisWorkbook.Sheets(ActiveSheet.Name).Range("ZZ8").End(xlToLeft).Column
+    On Error Resume Next
+    Row_DataEnd = 20000
+    Col_DataEnd = 200
+    If Row_DataEnd < 6 Then Row_DataEnd = 6
+
+    Excel.Application.ScreenUpdating = False
+    ThisWorkbook.Sheets(ActiveSheet.Name).Range("A6:" & NumToAlpha(Col_DataEnd) & Row_DataEnd).SpecialCells(xlCellTypeConstants).ClearContents
+    ThisWorkbook.Sheets(ActiveSheet.Name).Range("A6:" & NumToAlpha(Col_DataEnd) & Row_DataEnd).Font.ColorIndex = 1
+    ThisWorkbook.Sheets(ActiveSheet.Name).Range("A6:" & NumToAlpha(Col_DataEnd) & Row_DataEnd + 1).Borders(xlEdgeBottom).LineStyle = xlNone
+    ThisWorkbook.Sheets(ActiveSheet.Name).Range("A6:" & NumToAlpha(Col_DataEnd) & Row_DataEnd + 1).Borders(xlInsideHorizontal).LineStyle = xlNone
+    Excel.Application.ScreenUpdating = True
+
+End Sub
+
+Sub nterleave()
+    Dim i As Integer, j As Integer, k As Integer
+    Dim n As Integer, data_sheet As Worksheet
+    Dim tray_pos As Integer, nloop As Boolean
+    Dim nleave As Integer, row_iter As Integer
+    
+    
+    tray_pos = 7 'tray position is 7th column
+    bin_num = 4
+    
+    nleave = 3
+
+    nloop = True
+    
+    Set data_sheet = ThisWorkbook.ActiveSheet
+    n = CInt(data_sheet.Cells(2, 10))
+    If n = 0 Then n = 1
+    
+    row_iter = 6
+    j = 1
+    
+    Do While nloop = True
+        counter = 0
+        For i = 0 To n - 1 Step 1
+            If data_sheet.Cells(row_iter + i, bin_num) = "" Then
+                nloop = False
+                Exit For
+            Else
+                If data_sheet.Cells(row_iter + i, bin_num) <> data_sheet.Cells(row_iter + i + 1, bin_num) Then
+                    data_sheet.Cells(row_iter + i, nleave) = j
+                    counter = counter + 1
+                    j = 0
+                    Exit For
+                Else
+                    data_sheet.Cells(row_iter + i, nleave) = j
+                    counter = counter + 1
+                End If
+            End If
+        Next i
+        j = j + 1
+        row_iter = row_iter + counter
+    Loop
+    
+    Set data_sheet = ThisWorkbook.ActiveSheet
+    data_sheet.Sort.SortFields.Clear
+    data_sheet.Sort.SortFields.Add Key:=Range( _
+    NumToAlpha(3) & 5 & ":" & NumToAlpha(3) & "10000"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+    xlSortNormal
+    data_sheet.Sort.SortFields.Add Key:=Range( _
+    NumToAlpha(4) & 5 & ":" & NumToAlpha(4) & "10000"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+    xlSortNormal
+    With data_sheet.Sort
+        .SetRange Range(NumToAlpha(2) & 5 & ":" & NumToAlpha(11) & "10000")
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+
+    Range("A1").Select
+End Sub

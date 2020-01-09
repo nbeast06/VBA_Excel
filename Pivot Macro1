@@ -1,0 +1,682 @@
+Sub Macro3()
+    Dim data_loc As String
+    Dim data_dest As String
+    Dim max_row As Integer, max_col As Integer
+    Dim data_sheet As Worksheet, weighted_sheet As Worksheet
+    Dim data_hdr As Integer
+    
+    'Data Sheet Parameters
+    'Header Row
+    data_hdr = 2
+    
+    'DataSheet
+    Set data_sheet = ThisWorkbook.Worksheets("Data")
+    Set weighted_sheet = ThisWorkbook.Worksheets("Pivot Weighted")
+    
+    If IsEmpty(weighted_sheet.Range("A3").Value) = False Then
+        MsgBox ("Pivot Sheets already have value, enter to abort.")
+        Exit Sub
+    End If
+    
+    If IsEmpty(weighted_sheet.Range("A3").Value) = False Then
+        MsgBox ("Pivot Sheets already have value, enter to abort.")
+        Exit Sub
+    End If
+    
+   
+    max_row = data_sheet.Range("A100000:A100000").End(xlUp).Row
+    max_col = data_sheet.Range(NumToAlpha(50) & data_hdr & ":" & NumToAlpha(50) & data_hdr).End(xlToLeft).Column
+    
+    data_sheet.Range("A1").Value = "Tot: " & max_row - 2
+    
+    data_loc = "Data!R" & data_hdr & "C1:R" & max_row & "C" & max_col
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'Weighted Pivot Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    'Data destination for Pivot Weighted Sheet
+    data_dest = "'Pivot Weighted'!R3C1"
+    
+    ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:= _
+        data_loc, Version:=6).CreatePivotTable TableDestination:= _
+        data_dest, TableName:="PivotTable8", DefaultVersion:=6
+    
+    Sheets("Pivot Weighted").Select
+    
+    Cells(3, 1).Select 'location of pivot
+    
+    With ActiveSheet.PivotTables("PivotTable8")
+        .ColumnGrand = True
+        .HasAutoFormat = True
+        .DisplayErrorString = False
+        .DisplayNullString = True
+        .EnableDrilldown = True
+        .ErrorString = ""
+        .MergeLabels = False
+        .NullString = ""
+        .PageFieldOrder = 2
+        .PageFieldWrapCount = 0
+        .PreserveFormatting = True
+        .RowGrand = True
+        .SaveData = True
+        .PrintTitles = False
+        .RepeatItemsOnEachPrintedPage = True
+        .TotalsAnnotation = False
+        .CompactRowIndent = 1
+        .InGridDropZones = False
+        .DisplayFieldCaptions = True
+        .DisplayMemberPropertyTooltips = False
+        .DisplayContextTooltips = True
+        .ShowDrillIndicators = True
+        .PrintDrillIndicators = False
+        .AllowMultipleFilters = False
+        .SortUsingCustomLists = True
+        .FieldListSortAscending = False
+        .ShowValuesRow = False
+        .CalculatedMembersInFilters = False
+        .RowAxisLayout xlCompactRow
+    End With
+    With ActiveSheet.PivotTables("PivotTable8").PivotCache
+        .RefreshOnFileOpen = False
+        .MissingItemsLimit = xlMissingItemsDefault
+    End With
+    ActiveSheet.PivotTables("PivotTable8").RepeatAllLabels xlRepeatLabels
+    
+    'Counting column
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Company"), "Count of Company", xlCount
+    ActiveSheet.PivotTables("PivotTable8").PivotFields("Company").AutoSort _
+        xlDescending, "Count of Company", ActiveSheet.PivotTables("PivotTable8"). _
+        PivotColumnAxis.PivotLines(1), 1
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Min Salary"), "Min of Min Salary", xlMin
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Min Salary"), "Ave of Min Salary", xlAverage
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Max Salary"), "Ave of Max Salary", xlAverage
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Max Salary"), "Max of Max Salary", xlMax
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Company")
+        .Orientation = xlRowField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields( _
+        "No. of Yrs Work Experience")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Office Location")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Class")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'End of Weighted Pivot Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'Exp Pivot Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    'Data destination for Pivot Weighted Sheet
+    data_dest = "'Pivot Exp Count'!R3C1"
+    
+    ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:= _
+        data_loc, Version:=6).CreatePivotTable TableDestination:= _
+        data_dest, TableName:="PivotTable8", DefaultVersion:=6
+    
+    Sheets("Pivot Exp Count").Select
+    
+    Cells(3, 1).Select 'location of pivot
+    
+    With ActiveSheet.PivotTables("PivotTable8")
+        .ColumnGrand = True
+        .HasAutoFormat = True
+        .DisplayErrorString = False
+        .DisplayNullString = True
+        .EnableDrilldown = True
+        .ErrorString = ""
+        .MergeLabels = False
+        .NullString = ""
+        .PageFieldOrder = 2
+        .PageFieldWrapCount = 0
+        .PreserveFormatting = True
+        .RowGrand = True
+        .SaveData = True
+        .PrintTitles = False
+        .RepeatItemsOnEachPrintedPage = True
+        .TotalsAnnotation = False
+        .CompactRowIndent = 1
+        .InGridDropZones = False
+        .DisplayFieldCaptions = True
+        .DisplayMemberPropertyTooltips = False
+        .DisplayContextTooltips = True
+        .ShowDrillIndicators = True
+        .PrintDrillIndicators = False
+        .AllowMultipleFilters = False
+        .SortUsingCustomLists = True
+        .FieldListSortAscending = False
+        .ShowValuesRow = False
+        .CalculatedMembersInFilters = False
+        .RowAxisLayout xlCompactRow
+    End With
+    With ActiveSheet.PivotTables("PivotTable8").PivotCache
+        .RefreshOnFileOpen = False
+        .MissingItemsLimit = xlMissingItemsDefault
+    End With
+    ActiveSheet.PivotTables("PivotTable8").RepeatAllLabels xlRepeatLabels
+    
+    'Counting column
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Company"), "Count of Company", xlCount
+    ActiveSheet.PivotTables("PivotTable8").PivotFields("Company").AutoSort _
+        xlDescending, "Count of Company", ActiveSheet.PivotTables("PivotTable8"). _
+        PivotColumnAxis.PivotLines(1), 1
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("No. of Yrs Work Experience")
+        .Orientation = xlRowField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Office Location")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Class")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'End of Exp Pivot Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'Exp Range Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    'Data destination for Pivot Weighted Sheet
+    data_dest = "'Pivot Exp Range'!R3C1"
+    
+    ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:= _
+        data_loc, Version:=6).CreatePivotTable TableDestination:= _
+        data_dest, TableName:="PivotTable8", DefaultVersion:=6
+    
+    Sheets("Pivot Exp Range").Select
+    
+    Cells(3, 1).Select 'location of pivot
+    
+    With ActiveSheet.PivotTables("PivotTable8")
+        .ColumnGrand = True
+        .HasAutoFormat = True
+        .DisplayErrorString = False
+        .DisplayNullString = True
+        .EnableDrilldown = True
+        .ErrorString = ""
+        .MergeLabels = False
+        .NullString = ""
+        .PageFieldOrder = 2
+        .PageFieldWrapCount = 0
+        .PreserveFormatting = True
+        .RowGrand = True
+        .SaveData = True
+        .PrintTitles = False
+        .RepeatItemsOnEachPrintedPage = True
+        .TotalsAnnotation = False
+        .CompactRowIndent = 1
+        .InGridDropZones = False
+        .DisplayFieldCaptions = True
+        .DisplayMemberPropertyTooltips = False
+        .DisplayContextTooltips = True
+        .ShowDrillIndicators = True
+        .PrintDrillIndicators = False
+        .AllowMultipleFilters = False
+        .SortUsingCustomLists = True
+        .FieldListSortAscending = False
+        .ShowValuesRow = False
+        .CalculatedMembersInFilters = False
+        .RowAxisLayout xlCompactRow
+    End With
+    With ActiveSheet.PivotTables("PivotTable8").PivotCache
+        .RefreshOnFileOpen = False
+        .MissingItemsLimit = xlMissingItemsDefault
+    End With
+    ActiveSheet.PivotTables("PivotTable8").RepeatAllLabels xlRepeatLabels
+    
+    'data column
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Min Salary"), "Min of Min Salary", xlMin
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Max Salary"), "Max of Max Salary", xlMax
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Company")
+        .Orientation = xlRowField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("No. of Yrs Work Experience")
+        .Orientation = xlColumnField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Office Location")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Class")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'End of Exp Range Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'Class Range Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    'Data destination for Pivot Weighted Sheet
+    data_dest = "'Pivot Class Range'!R3C1"
+    
+    ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:= _
+        data_loc, Version:=6).CreatePivotTable TableDestination:= _
+        data_dest, TableName:="PivotTable8", DefaultVersion:=6
+    
+    Sheets("Pivot Class Range").Select
+    
+    Cells(3, 1).Select 'location of pivot
+    
+    With ActiveSheet.PivotTables("PivotTable8")
+        .ColumnGrand = True
+        .HasAutoFormat = True
+        .DisplayErrorString = False
+        .DisplayNullString = True
+        .EnableDrilldown = True
+        .ErrorString = ""
+        .MergeLabels = False
+        .NullString = ""
+        .PageFieldOrder = 2
+        .PageFieldWrapCount = 0
+        .PreserveFormatting = True
+        .RowGrand = True
+        .SaveData = True
+        .PrintTitles = False
+        .RepeatItemsOnEachPrintedPage = True
+        .TotalsAnnotation = False
+        .CompactRowIndent = 1
+        .InGridDropZones = False
+        .DisplayFieldCaptions = True
+        .DisplayMemberPropertyTooltips = False
+        .DisplayContextTooltips = True
+        .ShowDrillIndicators = True
+        .PrintDrillIndicators = False
+        .AllowMultipleFilters = False
+        .SortUsingCustomLists = True
+        .FieldListSortAscending = False
+        .ShowValuesRow = False
+        .CalculatedMembersInFilters = False
+        .RowAxisLayout xlCompactRow
+    End With
+    With ActiveSheet.PivotTables("PivotTable8").PivotCache
+        .RefreshOnFileOpen = False
+        .MissingItemsLimit = xlMissingItemsDefault
+    End With
+    ActiveSheet.PivotTables("PivotTable8").RepeatAllLabels xlRepeatLabels
+    
+    'data column
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Min Salary"), "Min of Min Salary", xlMin
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Max Salary"), "Max of Max Salary", xlMax
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Company")
+        .Orientation = xlRowField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Class")
+        .Orientation = xlColumnField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("No. of Yrs Work Experience")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Office Location")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'End of Class Range Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'Exp Pivot Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    'Data destination for Pivot Weighted Sheet
+    data_dest = "'Pivot Industry Count'!R3C1"
+    
+    ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:= _
+        data_loc, Version:=6).CreatePivotTable TableDestination:= _
+        data_dest, TableName:="PivotTable8", DefaultVersion:=6
+    
+    Sheets("Pivot Industry Count").Select
+    
+    Cells(3, 1).Select 'location of pivot
+    
+    With ActiveSheet.PivotTables("PivotTable8")
+        .ColumnGrand = True
+        .HasAutoFormat = True
+        .DisplayErrorString = False
+        .DisplayNullString = True
+        .EnableDrilldown = True
+        .ErrorString = ""
+        .MergeLabels = False
+        .NullString = ""
+        .PageFieldOrder = 2
+        .PageFieldWrapCount = 0
+        .PreserveFormatting = True
+        .RowGrand = True
+        .SaveData = True
+        .PrintTitles = False
+        .RepeatItemsOnEachPrintedPage = True
+        .TotalsAnnotation = False
+        .CompactRowIndent = 1
+        .InGridDropZones = False
+        .DisplayFieldCaptions = True
+        .DisplayMemberPropertyTooltips = False
+        .DisplayContextTooltips = True
+        .ShowDrillIndicators = True
+        .PrintDrillIndicators = False
+        .AllowMultipleFilters = False
+        .SortUsingCustomLists = True
+        .FieldListSortAscending = False
+        .ShowValuesRow = False
+        .CalculatedMembersInFilters = False
+        .RowAxisLayout xlCompactRow
+    End With
+    With ActiveSheet.PivotTables("PivotTable8").PivotCache
+        .RefreshOnFileOpen = False
+        .MissingItemsLimit = xlMissingItemsDefault
+    End With
+    ActiveSheet.PivotTables("PivotTable8").RepeatAllLabels xlRepeatLabels
+    
+    'Counting column
+    ActiveSheet.PivotTables("PivotTable8").AddDataField ActiveSheet.PivotTables( _
+        "PivotTable8").PivotFields("Company"), "Count of Company", xlCount
+    ActiveSheet.PivotTables("PivotTable8").PivotFields("Company").AutoSort _
+        xlDescending, "Count of Company", ActiveSheet.PivotTables("PivotTable8"). _
+        PivotColumnAxis.PivotLines(1), 1
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Company Industry")
+        .Orientation = xlRowField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Office Location")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("Class")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    With ActiveSheet.PivotTables("PivotTable8").PivotFields("No. of Yrs Work Experience")
+        .Orientation = xlPageField
+        .Position = 1
+    End With
+    
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    'End of Exp Pivot Code Block
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    data_sheet.Select
+    
+    
+End Sub
+Sub Macro5()
+'
+' Macro5 Macro
+'
+    
+    Sheets("Pivot Weighted").Select
+    Cells.Select
+    Range("A3").Activate
+    Selection.ClearContents
+    
+    Sheets("Pivot Exp Range").Select
+    Cells.Select
+    Range("A3").Activate
+    Selection.ClearContents
+    
+    Sheets("Pivot Exp Count").Select
+    Cells.Select
+    Range("A3").Activate
+    Selection.ClearContents
+    
+    Sheets("Pivot Industry Count").Select
+    Cells.Select
+    Range("A3").Activate
+    Selection.ClearContents
+    
+    Sheets("Pivot Class Range").Select
+    Cells.Select
+    Range("A3").Activate
+    Selection.ClearContents
+    Sheets("Data").Select
+    Sheets("Data").Range("A1").Value = ""
+End Sub
+Public Function NumToAlpha(ByVal n As Long) As String   '
+    Dim strRet As String
+    Const cStringTable As String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    If n < 1& Then Exit Function
+    strRet = Mid$(cStringTable, (n - 1&) Mod 26 + 1&, 1&)
+    Do While n > 26&
+        n = (n - 1&) \ 26
+        strRet = Mid$(cStringTable, (n - 1&) Mod 26& + 1&, 1&) & strRet
+    Loop
+    NumToAlpha = strRet
+End Function
+Sub chart()
+
+Dim cht As ChartObject, cht2 As ChartObject
+Dim pvt_exp As Worksheet, pvt_ind As Worksheet, data_sheet As Worksheet
+Dim hdr As Integer, max_row As Integer
+
+Set pvt_exp = ActiveWorkbook.Worksheets("Pivot Exp Count")
+Set pvt_ind = ActiveWorkbook.Worksheets("Pivot Industry Count")
+Set data_sheet = ActiveWorkbook.Worksheets("Data")
+
+If IsEmpty(pvt_exp.Range("A3").Value) = True Then
+    MsgBox ("Pivot Sheets are EMPTY, enter to abort.")
+    Exit Sub
+End If
+If IsEmpty(pvt_ind.Range("A3").Value) = True Then
+    MsgBox ("Pivot Sheets are EMPTY, enter to abort.")
+    Exit Sub
+End If
+
+max_row = pvt_exp.Range("A10000:A10000").End(xlUp).Row
+
+'remove total from pivot
+max_row = max_row - 1
+
+'MsgBox (max_row)
+
+Set cht = pvt_exp.ChartObjects.Add(Top:=70, Left:=300, Width:=300, Height:=200)
+
+With cht.chart
+    .ChartType = xlColumnClustered
+    .SetSourceData pvt_exp.Range("A3:B" & max_row)
+End With
+    
+
+max_row = pvt_ind.Range("A10000:A10000").End(xlUp).Row
+
+'remove total from pivot
+max_row = max_row - 1
+
+'MsgBox (max_row)
+
+Set cht2 = pvt_ind.ChartObjects.Add(Top:=70, Left:=300, Width:=300, Height:=200)
+
+With cht2.chart
+    .ChartType = xlDoughnut
+    .SetSourceData pvt_ind.Range("A3:B" & max_row)
+End With
+
+data_sheet.Select
+
+
+End Sub
+
+Sub chart_del()
+
+Dim pvt_exp As Worksheet, pvt_ind As Worksheet, data_sheet As Worksheet
+
+
+Set pvt_exp = ActiveWorkbook.Worksheets("Pivot Exp Count")
+Set pvt_ind = ActiveWorkbook.Worksheets("Pivot Industry Count")
+Set data_sheet = ActiveWorkbook.Worksheets("Data")
+
+If pvt_exp.ChartObjects.Count = 0 Then
+    MsgBox ("Pivot Sheets are EMPTY, enter to abort.")
+    Exit Sub
+End If
+If pvt_ind.ChartObjects.Count = 0 Then
+    MsgBox ("Pivot Sheets are EMPTY, enter to abort.")
+    Exit Sub
+End If
+
+pvt_exp.ChartObjects.Delete
+pvt_ind.ChartObjects.Delete
+data_sheet.Select
+
+End Sub
+
+Sub grab_pivots()
+
+Dim pvt_sht As Worksheet, actv_sht As Worksheet
+Dim max_row As Integer, max_col As Integer
+
+Set pvt_sht = ActiveWorkbook.Worksheets("Pivot Weighted")
+Set actv_sht = ActiveWorkbook.Worksheets("Summary")
+
+pvt_sht.Select
+
+'Grab data from pivot table: weighted mean
+
+max_row = pvt_sht.Range("A100000:A100000").End(xlUp).Row
+max_row = max_row - 1
+max_col = pvt_sht.Range("Z3:Z3").End(xlToLeft).Column
+
+pvt_sht.Range("A3:" & NumToAlpha(max_col) & max_row).Select
+Application.CutCopyMode = False
+Selection.Copy
+actv_sht.Select
+Range("A5").Select
+Selection.PasteSpecial Paste:=xlPasteAll, Operation:=xlNone, SkipBlanks:= _
+False, Transpose:=True
+
+End Sub
+
+Sub build_charts()
+
+Dim indx As Integer, clr As Integer
+Dim i As Integer, rng As Range, x As Integer
+Dim actv_sht As Worksheet
+Dim max_col As Integer
+
+Set actv_sht = ActiveWorkbook.Worksheets("Summary")
+
+actv_sht.Select
+
+'Can process upto 10 companies
+For i = 1 To 10 Step 1
+    Set rng = actv_sht.Range("A4:" & NumToAlpha(100) & "3").Find(CStr(i), LookIn:=xlValues, MatchCase:=False)
+    If Not rng Is Nothing Then
+        actv_sht.Range(NumToAlpha(rng.Column) & "5:" & NumToAlpha(rng.Column) & "10").Copy
+        actv_sht.Range(NumToAlpha(i + 1) & "13:" & NumToAlpha(i + 1) & "13").PasteSpecial
+        Application.CutCopyMode = False
+        
+        actv_sht.Cells(21, i + 1).Value = actv_sht.Cells(13, i + 1).Value
+        actv_sht.Cells(22, i + 1).Value = actv_sht.Cells(15, i + 1).Value
+        actv_sht.Cells(23, i + 1).Value = actv_sht.Cells(16, i + 1).Value - actv_sht.Cells(15, i + 1).Value
+        actv_sht.Cells(24, i + 1).Value = actv_sht.Cells(17, i + 1).Value - actv_sht.Cells(16, i + 1).Value
+        actv_sht.Cells(25, i + 1).Value = actv_sht.Cells(18, i + 1).Value - actv_sht.Cells(17, i + 1).Value
+    End If
+Next i
+
+max_col = actv_sht.Range(NumToAlpha(100) & "21:" & NumToAlpha(100) & "21").End(xlToLeft).Column
+    
+    ActiveSheet.Shapes.AddChart2(297, xlColumnStacked).Select
+    ActiveChart.SetSourceData Source:=Range("Summary!$B$21:$" & NumToAlpha(max_col) & "$25")
+    
+    ActiveChart.PlotBy = xlRows
+    'ActiveChart.PlotBy = xlColumns 'Alternate
+    
+    ActiveChart.SetElement (msoElementChartTitleNone)
+    ActiveChart.SetElement (msoElementPrimaryValueGridLinesNone)
+    ActiveChart.SetElement (msoElementLegendNone)
+    ActiveChart.Axes(xlValue).Select
+    ActiveChart.Axes(xlValue).DisplayUnit = xlThousands
+    ActiveChart.PlotArea.Select
+    ActiveChart.FullSeriesCollection(1).Select
+    Selection.Format.Fill.Visible = msoFalse
+    ActiveChart.FullSeriesCollection(3).Select
+    ActiveChart.FullSeriesCollection(2).Select
+    With Selection.Format.Fill
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorBackground1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = -0.150000006
+        .Transparency = 0
+        .Solid
+    End With
+    ActiveChart.FullSeriesCollection(4).Select
+    With Selection.Format.Fill
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorBackground1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = -0.150000006
+        .Transparency = 0
+        .Solid
+    End With
+    
+    ActiveChart.FullSeriesCollection(3).Select
+    
+    If ActiveSheet.Range("I2").Value = "AIOCP" Then clr = 240
+    If ActiveSheet.Range("I2").Value = "ATCP" Then clr = 80
+    
+    With Selection.Format.Fill
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(0, 176, clr)
+        .Transparency = 0
+        .Solid
+    End With
+    ActiveChart.ChartArea.Select
+    'Reposition Chart
+    ActiveChart.Parent.Top = 160
+    ActiveChart.Parent.Left = 550
+End Sub
+

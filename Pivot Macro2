@@ -1,0 +1,97 @@
+Sub clear_source()
+
+    Range("B5:" & NumToAlpha(100) & "10").Select
+    Selection.ClearContents
+    
+End Sub
+Sub clear_chrtdata()
+
+    Range("B13:" & NumToAlpha(100) & "18").Select
+    Selection.ClearContents
+    Range("B21:" & NumToAlpha(100) & "25").Select
+    Selection.ClearContents
+    
+End Sub
+
+Sub clear_order()
+
+    Range("B4:" & NumToAlpha(100) & "4").Select
+    Selection.ClearContents
+
+End Sub
+
+Sub data_summary()
+
+    Dim actv_sht As Worksheet, cls_sht As Worksheet, exp_sht As Worksheet, macro_sht As Worksheet
+    Dim max_col As Integer, max_row As Integer
+    Dim max_col2 As Integer, max_row2 As Integer
+    
+    Set actv_sht = ThisWorkbook.Worksheets("Summary")
+    Set cls_sht = ThisWorkbook.Worksheets("Pivot Class Range")
+    Set exp_sht = ThisWorkbook.Worksheets("Pivot Exp Range")
+    Set mcro_sht = ThisWorkbook.Worksheets("Format Macro")
+    
+    'Cleanum Macro Sheet
+    mcro_sht.Select
+    mcro_sht.Range("A1:O100").Select
+    Selection.ClearContents
+    
+    'Data collection from Pivot Plots
+    If actv_sht.Range("P2").Value = "CLASS" Then
+        cls_sht.Select
+        If cls_sht.Range("A6").Value = "" Then
+            MsgBox "Missing Values in Pivot Class Range"
+        End If
+        max_col = cls_sht.Range(NumToAlpha(100) & "5:" & NumToAlpha(100) & "5").End(xlToLeft).Column
+        max_row = cls_sht.Range("A10000:A10000").End(xlUp).Row
+        max_row = max_row - 1
+        cls_sht.Range("A4:" & NumToAlpha(max_col) & max_row).Copy
+        mcro_sht.Range("A1").PasteSpecial
+    End If
+    
+    If actv_sht.Range("P2").Value = "YEAR" Then
+        exp_sht.Select
+        If exp_sht.Range("A6").Value = "" Then
+            MsgBox "Missing Values in Pivot Exp Range"
+        End If
+        max_col = exp_sht.Range(NumToAlpha(100) & "5:" & NumToAlpha(100) & "5").End(xlToLeft).Column
+        max_row = exp_sht.Range("A10000:A10000").End(xlUp).Row
+        max_row = max_row - 1
+        exp_sht.Range("A4:" & NumToAlpha(max_col) & max_row).Copy
+        mcro_sht.Range("A1").PasteSpecial
+    End If
+    
+    'Grab Processed Data
+    mcro_sht.Select
+    max_row2 = Cells.Find(What:="*", _
+                    After:=Range("R100"), _
+                    LookAt:=xlPart, _
+                    LookIn:=xlValues, _
+                    SearchOrder:=xlByRows, _
+                    SearchDirection:=xlPrevious, _
+                    MatchCase:=False).Row
+    max_col2 = Cells.Find(What:="*", _
+                    After:=Range(NumToAlpha(100) & "2"), _
+                    LookAt:=xlPart, _
+                    LookIn:=xlValues, _
+                    SearchOrder:=xlByColumns, _
+                    SearchDirection:=xlPrevious, _
+                    MatchCase:=False).Column
+                    
+    'max_row2 = mcro_sht.Range("A100").End(xlUp).Row
+    'MsgBox "R2:" & NumToAlpha(max_col2) & max_row2
+    mcro_sht.Range("R2:" & NumToAlpha(max_col2) & max_row2).Copy
+    actv_sht.Range("B28").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    actv_sht.Select
+    
+End Sub
+
+Sub clear_summary()
+    Dim actv_sht As Worksheet
+    
+    Set actv_sht = ThisWorkbook.Sheets("Summary")
+    actv_sht.Range("B28: K100").Select
+    Selection.ClearContents
+
+End Sub
